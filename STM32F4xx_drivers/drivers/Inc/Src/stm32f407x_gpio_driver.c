@@ -125,7 +125,39 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
 
 	}else
 	{
-		//this part will code later . ( interrupt mode)
+		if(pGPIOHandle->GPIO_PinConfig.GPIO_PinMode <= GPIO_MODE_IT_FT){
+			//1. Configure the FTSR
+			EXTI ->FTSR |=(1<<pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+			//2.Clear the corresponding RTSR
+			EXTI ->RTSR &= ~(1<<pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+
+		}
+		else if(pGPIOHandle->GPIO_PinConfig.GPIO_PinMode <= GPIO_MODE_IT_RT){
+			//1. Configure the RTSR
+			EXTI ->RTSR |=(1<<pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+			//2.Clear the corresponding FTSR
+			EXTI ->FTSR &= ~(1<<pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+
+		}
+		else if(pGPIOHandle->GPIO_PinConfig.GPIO_PinMode <= GPIO_MODE_IT_RFT){
+			//Configure the FTSR and RTSR
+			EXTI ->FTSR |=(1<<pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+			EXTI ->RTSR |=(1<<pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+		}
+
+
+		//2. configure the GPIO port selection in SYSCFG_EXTICR
+
+			uint8_t temp1 = pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber / 4;
+			uint8_t temp2 = pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber % 4;
+			uint8_t portcode = GPIO_BASEADDR_TO_CODE(pGPIOHandle->pGPIOx);
+
+
+			SYSCFG_PCLK_EN();
+			SYSCFG->EXTICR[temp1] = portcode << (temp2*4);
+
+				//3 . enable the exti interrupt delivery using IMR
+				EXTI->IMR |= 1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber;
 
 
 	}
@@ -335,11 +367,121 @@ void GPIO_ToggleOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t PinNumber){
 }
 
 
-/*
- * IRQ Configuration and ISR handling
+
+
+/*********************************************************************
+ * @fn      		  - IRQ Configuration and ISR handling
+ *
+ * @brief             -
+ *
+ * @param[in]         -
+ * @param[in]         -
+ * @param[in]         -
+ *
+ * @return            -   0 or 1
+ *
+ * @Note              -
+
  */
-void GPIO_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi);
-void GPIO_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority);
-void GPIO_IRQHandling(uint8_t PinNumber);
+
+void GPIO_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi){
+
+	if(EnorDi == ENABLE){
+		if(IRQNumber <= 31){
+
+			//program ISER0 ( Interrupt Set Enable Register)
+			*NVIC_ISER0 |= (1<<IRQNumber);
+
+		}else if( IRQNumber > 31 && IRQNumber <64 ){
+
+			//program ISER1 ( Interrupt Set Enable Register)
+			*NVIC_ISER1 |= (1<<(IRQNumber / 32));
+
+		}else if(IRQNumber >=64 && IRQNumber < 96){
+
+			//program ISER2 ( Interrupt Set Enable Register)
+			*NVIC_ISER2 |= (1<<(IRQNumber / 64));
+
+		}
+	}
+
+
+	else
+	{
+		if(IRQNumber <= 31){
+
+			//program ICER0 ( Interrupt Clear Enable Register)
+			*NVIC_ICER0 |= (1<<IRQNumber);
+
+		}else if( IRQNumber > 31 && IRQNumber <64 ){
+
+			//program ICER1 ( Interrupt Clear Enable Register)
+			*NVIC_ICER1 |= (1<<(IRQNumber / 32));
+
+		}else if(IRQNumber >=64 && IRQNumber < 96){
+
+			//program ICER2 ( Interrupt Clear Enable Register)
+			*NVIC_ICER2 |= (1<<(IRQNumber / 64));
+
+		}
+
+	}
+
+}
+
+
+
+/*********************************************************************
+ * @fn      		  - GPIO_Interrupt Priority Configuration
+ *
+ * @brief             -
+ *
+ * @param[in]         -
+ * @param[in]         -
+ * @param[in]         -
+ *
+ * @return            -   0 or 1
+ *
+ * @Note              -
+
+ */
+void GPIO_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority){
+
+	//1. first lets find out the IPR Register
+	uint8_t iprx = IRQNumber / 4;
+	uint8_t iprx_section = IRQNumber % 4;
+
+	uint8_t shift_amount = (8* iprx_section) + (8 - NO_PR_BITS_IMPLEMENTED);
+	*(NVIC_PR_BASE_ADDR + iprx ) |= (IRQPriority << shift_amount);
+
+
+}
+
+
+
+/*********************************************************************
+ * @fn      		  - GPIO_IRQ Handling Configuration
+ *
+ * @brief             -
+ *
+ * @param[in]         -
+ * @param[in]         -
+ * @param[in]         -
+ *
+ * @return            -   0 or 1
+ *
+ * @Note              -
+
+ */
+
+void GPIO_IRQHandling(uint8_t PinNumber){
+
+	//clear the EXTI PR register corresponding to the pin number
+	if(EXTI -> PR & (1 << PinNumber)){
+		//clear
+		EXTI->PR |= ( 1 << PinNumber);
+	}
+
+}
 
 
