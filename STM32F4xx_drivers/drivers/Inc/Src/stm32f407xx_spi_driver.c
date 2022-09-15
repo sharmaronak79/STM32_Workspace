@@ -64,18 +64,18 @@ void SPI_Init(SPI_Handle_t *pSPIHandle){
 	if(pSPIHandle->SPIConfig.SPI_BusConfig == SPI_BUS_CONFIG_FD)
 		{
 			//bidi mode should be cleared
-			tempreg &= ~( 1 << SPI_CR1_BIDIMODE);
+			temp &= ~( 1 << SPI_CR1_BIDIMODE);
 
 		}else if (pSPIHandle->SPIConfig.SPI_BusConfig == SPI_BUS_CONFIG_HD)
 		{
 			//bidi mode should be set
-			tempreg |= ( 1 << SPI_CR1_BIDIMODE);
+			temp |= ( 1 << SPI_CR1_BIDIMODE);
 		}else if (pSPIHandle->SPIConfig.SPI_BusConfig == SPI_BUS_CONFIG_SIMPLEX_RXONLY)
 		{
 			//BIDI mode should be cleared
-			tempreg &= ~( 1 << SPI_CR1_BIDIMODE);
+			temp &= ~( 1 << SPI_CR1_BIDIMODE);
 			//RXONLY bit must be set
-			tempreg |= ( 1 << SPI_CR1_RXONLY);
+			temp |= ( 1 << SPI_CR1_RXONLY);
 		}
 
 	//3. Configure the spi serial clock speed(Baud rate)
@@ -126,17 +126,60 @@ void SPI_DeInit(SPI_RegDef_t *pSPIx){
 }
 
 
+/*
+ *  SPI_GetFlagStatus Function
+ */
+
+uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPIx,uint32_t FlagName){
+	if(pSPIx->SR & FlagName){
+		return FLAG_SET;
+	}
+	return FLAG_RESET;
+}
+
+
 // SPI Send Data
 
 void SPI_SendData(SPI_RegDef_t *pSPIx,uint8_t *pTxBuffer, uint32_t Len){
-	
+
 	while(Len > 0){
 		//1. Wait until TXE is set
-		while( ! (pSPIx -> SR & (1<<1) ) );
-		
-		
+		//while( ! (pSPIx -> SR & (1<<1) ) );
+		while(SPI_GetFlagStatus(pSPIx,SPI_TXE_FLAG) == FLAG_RESET);
+
+		//2. check the DFF bit in CR1
+		if(pSPIx->CR1 & (1 << SPI_CR1_DFF)){
+			//16 Bit DFF
+			//1. LOad the data in to Data Register
+			pSPIx->DR = *((uint16_t*)pTxBuffer);
+			Len--;
+			Len--;
+			(uint16_t*)pTxBuffer++;
+		}else{
+			//8 Bit DFF
+			// Load the data in to the Data register
+			pSPIx->DR = *(pTxBuffer);
+			Len--;
+			pTxBuffer++;
+
+		}
 	}
-	
-	
+
 }
+
+
+
+void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnorDi){
+
+	if(EnorDi == ENABLE){
+
+		pSPIx-> CR1 |=(1  << SPI_CR1_SPE);
+	}else{
+		pSPIx -> CR1 &= ~(1 << SPI_CR1_SPE);
+	}
+}
+
+
+
+
 
