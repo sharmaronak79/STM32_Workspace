@@ -64,6 +64,14 @@ typedef struct{
 
 
 /*
+ *  @DFF
+ */
+
+
+#define SPI_DFF_8BITS     0
+#define SPI_DFF_16BITS    1
+
+/*
  *  @SPI_CPOL
  */
 
@@ -100,16 +108,6 @@ typedef struct{
 
 
 
-/*
- *  SPI_GetFlagStatus Function
- */
-
-uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPIx,uint32_t FlagName){
-	if(pSPIx->SR & FlagName){
-		return FLAG_SET;
-	}
-	return FLAG_RESET;
-}
 
 
 
@@ -165,6 +163,12 @@ void SPI_CloseReception(SPI_Handle_t *pSPIHandle);
  * Application callback
  */
 void SPI_ApplicationEventCallback(SPI_Handle_t *pSPIHandle,uint8_t AppEv);
+
+
+/*
+ *  SPI Enable
+ */
+void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnorDi);
 
 
 
