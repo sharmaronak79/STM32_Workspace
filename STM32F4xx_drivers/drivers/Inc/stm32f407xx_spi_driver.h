@@ -171,6 +171,12 @@ void SPI_ApplicationEventCallback(SPI_Handle_t *pSPIHandle,uint8_t AppEv);
 void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnorDi);
 
 
+/*
+ *  SPI SSI Enable
+ */
+void SPI_SSIConfig(SPI_RegDef_t *pSPIx, uint8_t EnorDi);
+
+
 
 
 #endif /* INC_STM32F407XX_SPI_DRIVER_H_ */
