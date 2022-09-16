@@ -75,11 +75,17 @@ int main(){
 	//This function is used to initialize the SPI2 peripheral parameters
 	SPI2_Inits();
 
+	// make SSI Enable to connect NSS to +VCC and avoid MODF Error
+	SPI_SSIConfig(SPI2,ENABLE);
+
 	//Enable the SPI2 Peripheral
 	SPI_PeripheralControl(SPI2, ENABLE);
 
 	//to send data
 	SPI_SendData(SPI2, (uint8_t*)user_data, strlen(user_data));
+
+	//After the successful transmission of byte we have to Disable the SPI2 Peripheral
+	SPI_PeripheralControl(SPI2, DISABLE);
 
 
 	while(1);    // Infinite while loop to hang the application
