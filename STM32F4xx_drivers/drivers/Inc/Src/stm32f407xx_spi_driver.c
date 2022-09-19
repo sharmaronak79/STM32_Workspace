@@ -181,6 +181,7 @@ void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnorDi){
 
 
 void SPI_SSIConfig(SPI_RegDef_t *pSPIx, uint8_t EnorDi){
+
 	if(EnorDi == ENABLE){
 
 			pSPIx-> CR1 |=(1  << SPI_CR1_SSI);
@@ -190,4 +191,42 @@ void SPI_SSIConfig(SPI_RegDef_t *pSPIx, uint8_t EnorDi){
 }
 
 
+void SPI_SSOEConfig(SPI_RegDef_t *pSPIx, uint8_t EnorDi){
 
+	if(EnorDi == ENABLE){
+
+				pSPIx-> CR2 |=(1  << SPI_CR2_SSOE);
+			}else{
+				pSPIx -> CR2 &= ~(1 << SPI_CR2_SSOE);
+			}
+
+}
+
+
+void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t Len){
+	while(Len > 0){
+			//1. Wait until RXXE is set
+			//while( ! (pSPIx -> SR & (1<<1) ) );
+			while(SPI_GetFlagStatus(pSPIx,SPI_RXNE_FLAG) == FLAG_RESET);
+
+			//2. check the DFF bit in CR1
+			if(pSPIx->CR1 & (1 << SPI_CR1_DFF)){
+				//16 Bit DFF
+				//1. LOad the data in to Data Register
+				  *((uint16_t*)pTxBuffer) = pSPIx->DR;
+				Len--;
+				Len--;
+				(uint16_t*)pTxBuffer++;
+			}else{
+
+				//8 Bit DFF
+				// Load the data from Data register to RxBuffer address
+				pSPIx->DR = *(pTxBuffer);
+				Len--;
+				(uint16_t*)pTxBuffer++;
+
+			}
+		}
+
+
+}
