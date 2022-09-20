@@ -30,7 +30,33 @@ typedef struct{
 typedef struct{
 	SPI_RegDef_t 	*pSPIx;   /*!< This holds the base address of SPIx(x:0,1,2) peripheral >*/
 	SPI_Config_t 	SPIConfig;
+	uint8_t 		*pTxBuffer; /* !< To store the app. Tx buffer address > */
+	uint8_t 		*pRxBuffer;	/* !< To store the app. Rx buffer address > */
+	uint32_t 		TxLen;		/* !< To store Tx len > */
+	uint32_t 		RxLen;		/* !< To store Tx len > */
+	uint8_t 		TxState;	/* !< To store Tx state > */
+	uint8_t 		RxState;	/* !< To store Rx state > */
 }SPI_Handle_t;
+
+
+
+/*
+ * SPI application states
+ */
+#define SPI_READY 					0
+#define SPI_BUSY_IN_RX 				1
+#define SPI_BUSY_IN_TX 				2
+
+/*
+ * Possible SPI Application events
+ */
+#define SPI_EVENT_TX_CMPLT   1
+#define SPI_EVENT_RX_CMPLT   2
+#define SPI_EVENT_OVR_ERR    3
+#define SPI_EVENT_CRC_ERR    4
+
+
+
 
 
 /*
@@ -177,7 +203,7 @@ void SPI_SSIConfig(SPI_RegDef_t *pSPIx, uint8_t EnorDi);
 
 
 /*
- *  SPI SSOE Enable
+ *  SPI SSOE Enable ,  Software Slave Output Enable
  */
 void SPI_SSOEConfig(SPI_RegDef_t *pSPIx, uint8_t EnOrDi);
 
