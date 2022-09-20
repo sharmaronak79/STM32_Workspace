@@ -5,11 +5,13 @@
  *      Author: ronakkumar_sharma
  */
 #include<stdint.h>
+#include<stddef.h>
 #ifndef INC_STM32F407XX_H_
 #define INC_STM32F407XX_H_
 
 
 #define __vo volatile
+#define __weak __attribute__((weak))
 
 
 /********************************START : Processor Specific Details*********************************************************
@@ -102,6 +104,7 @@
 
 #define EXTI_BASEADDR				(APB2PERIPH_BASE + 0x3C00)
 #define SPI1_BASEADDR				(APB2PERIPH_BASE + 0x3000)
+#define SPI4_BASEADDR				(APB2PERIPH_BASE + 0x3400)
 #define SYSCFG_BASEADDR        		(APB2PERIPH_BASE + 0x3800)
 #define USART1_BASEADDR				(APB2PERIPH_BASE + 0x1000)
 #define USART6_BASEADDR				(APB2PERIPH_BASE + 0x1400)
@@ -210,6 +213,20 @@ typedef struct
 }SYSCFG_RegDef_t;
 
 
+/*
+ * peripheral register definition structure for SPI
+ */
+typedef struct{
+	__vo uint32_t CR1;
+	__vo uint32_t CR2;
+	__vo uint32_t SR;
+	__vo uint32_t DR;
+	__vo uint32_t CRCPR;
+	__vo uint32_t RXCRCR;
+	__vo uint32_t TXCRCR;
+	__vo uint32_t I2SCFGR;
+	__vo uint32_t I2SPR;
+}SPI_RegDef_t;
 
 /*
  * peripheral definitions ( Peripheral base addresses typecasted to xxx_RegDef_t)
@@ -230,6 +247,11 @@ typedef struct
 #define EXTI									((EXTI_RegDef_t*)EXTI_BASEADDR)
 #define SYSCFG									((SYSCFG_RegDef_t*)SYSCFG_BASEADDR)
 
+
+#define SPI1									((SPI_RegDef_t*)SPI1_BASEADDR)
+#define SPI2									((SPI_RegDef_t*)SPI2_BASEADDR)
+#define SPI3									((SPI_RegDef_t*)SPI3_BASEADDR)
+#define SPI4									((SPI_RegDef_t*)SPI4_BASEADDR)
 
 
 /*
@@ -254,9 +276,9 @@ typedef struct
  */
 
 
-#define I2C1_PCLK_EN()							RCC->APB1ENR|=(1<<21)
-#define I2C2_PCLK_EN()							RCC->APB1ENR|=(1<<22)
-#define I2C3_PCLK_EN()							RCC->APB1ENR|=(1<<23)
+#define I2C1_PCLK_EN()							(RCC->APB1ENR|=(1<<21))
+#define I2C2_PCLK_EN()							(RCC->APB1ENR|=(1<<22))
+#define I2C3_PCLK_EN()							(RCC->APB1ENR|=(1<<23))
 
 
 
@@ -264,10 +286,10 @@ typedef struct
  * Clock Enable Macros for SPIx peripherals
  */
 
-#define SPI1_PCLK_EN()                  		RCC->APB2ENR|=(1<<12)
-#define SPI2_PCLK_EN()                  		RCC->APB1ENR|=(1<<14)
-#define SPI3_PCLK_EN()                  		RCC->APB1ENR|=(1<<15)
-
+#define SPI1_PCLK_EN()                  		(RCC->APB2ENR|= (1<<12))
+#define SPI2_PCLK_EN()                  		(RCC->APB1ENR|= (1<<14))
+#define SPI3_PCLK_EN()                  		(RCC->APB1ENR|= (1<<15))
+#define SPI4_PCLK_EN()							(RCC->APB2ENR|= (1<<13))
 
 
 /*
@@ -317,9 +339,10 @@ typedef struct
 /*
  * Clock Disable Macros for SPIx peripherals
  */
-#define SPI1_PCLK_DI()                  		RCC->APB2ENR &= ~(1<<12)
-#define SPI2_PCLK_DI()                  		RCC->APB1ENR &= ~(1<<14)
-#define SPI3_PCLK_DI()                  		RCC->APB1ENR &= ~(1<<15)
+#define SPI1_PCLK_DI()                  		(RCC->APB2ENR &= ~(1<<12))
+#define SPI2_PCLK_DI()                  		(RCC->APB1ENR &= ~(1<<14))
+#define SPI3_PCLK_DI()                  		(RCC->APB1ENR &= ~(1<<15))
+#define SPI4_PCLK_DI()                  		(RCC->APB2ENR &= ~(1<<13))
 
 
 /*
@@ -358,6 +381,7 @@ typedef struct
 #define GPIOI_REG_RESET()						do{ RCC->AHB1RSTR |= (1<<8);		RCC->AHB1RSTR &= ~(1<<8);} while(0)
 
 
+
 #define GPIO_BASEADDR_TO_CODE(x)		(  	(x==GPIOA)?0:\
 											(x==GPIOB)?1:\
 											(x==GPIOC)?2:\
@@ -391,14 +415,73 @@ typedef struct
 #define RESET				DISABLE
 #define GPIO_PIN_SET		SET
 #define GPIO_PIN_RESET		RESET
+#define FLAG_SET			1
+#define FLAG_RESET    		0
+
+
+
+/******************************************************************************************
+ *Bit position definitions of SPI peripheral
+ ******************************************************************************************/
+/*
+ * Bit position definitions SPI_CR1
+ */
+#define SPI_CR1_CPHA     				 0
+#define SPI_CR1_CPOL      				 1
+#define SPI_CR1_MSTR     				 2
+#define SPI_CR1_BR   					 3
+#define SPI_CR1_SPE     				 6
+#define SPI_CR1_LSBFIRST   			 	 7
+#define SPI_CR1_SSI     				 8
+#define SPI_CR1_SSM      				 9
+#define SPI_CR1_RXONLY      		 	10
+#define SPI_CR1_DFF     			 	11
+#define SPI_CR1_CRCNEXT   			 	12
+#define SPI_CR1_CRCEN   			 	13
+#define SPI_CR1_BIDIOE     			 	14
+#define SPI_CR1_BIDIMODE      			15
+
+/*
+ * Bit position definitions SPI_CR2
+ */
+#define SPI_CR2_RXDMAEN		 			0
+#define SPI_CR2_TXDMAEN				 	1
+#define SPI_CR2_SSOE				 	2
+#define SPI_CR2_FRF						4
+#define SPI_CR2_ERRIE					5
+#define SPI_CR2_RXNEIE				 	6
+#define SPI_CR2_TXEIE					7
+
+
+/*
+ * Bit position definitions SPI_SR
+ */
+#define SPI_SR_RXNE						0
+#define SPI_SR_TXE				 		1
+#define SPI_SR_CHSIDE				 	2
+#define SPI_SR_UDR					 	3
+#define SPI_SR_CRCERR				 	4
+#define SPI_SR_MODF					 	5
+#define SPI_SR_OVR					 	6
+#define SPI_SR_BSY					 	7
+#define SPI_SR_FRE					 	8
 
 
 
 
 
+/*
+ *  Macros to reset SPIx peripherals
+ */
+
+#define SPI1_REG_RESET()       					do{ RCC->APB2RSTR |= (1<<12);	    RCC->APB2RSTR &= ~(1<<12);}while(0)
+#define SPI2_REG_RESET()       					do{ RCC->APB1RSTR |= (1<<14);	    RCC->APB2RSTR &= ~(1<<12);}while(0)
+#define SPI3_REG_RESET()       					do{ RCC->APB1RSTR |= (1<<15);	    RCC->APB2RSTR &= ~(1<<12);}while(0)
+#define SPI4_REG_RESET()       					do{ RCC->APB2RSTR |= (1<<13);	    RCC->APB2RSTR &= ~(1<<13);}while(0)
 
 
 
-
+#include"stm32f407xx_gpio_driver.h"
+#include "stm32f407xx_spi_driver.h"
 
 #endif /* INC_STM32F407XX_H_ */
