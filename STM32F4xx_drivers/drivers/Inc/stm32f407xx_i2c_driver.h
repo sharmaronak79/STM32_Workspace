@@ -43,8 +43,8 @@ typedef struct{
 /*
  * @I2C
  */
-#define I2C_ACK_CONTROL_ENABLE			1
-#define I2C_ACK_CONTROL_DISABLE			0
+#define I2C_ACK_ENABLE			1
+#define I2C_ACK_DISABLE			0
 
 
 
@@ -110,7 +110,7 @@ void I2C_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority);
  */
 uint8_t I2C_GetFlagStatus(I2C_RegDef_t *pI2Cx , uint32_t FlagName);
 void I2C_PeripheralControl(I2C_RegDef_t *pI2Cx, uint8_t EnorDi);
-
+void I2C_ManageAcking(I2C_RegDef_t *pI2Cx, uint8_t EnorDi);
 
 
 
