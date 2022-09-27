@@ -28,7 +28,24 @@ typedef struct{
 typedef struct{
 	I2C_RegDef_t *pI2Cx; /*This holds the base address of I2Cx*/
 	I2C_Config_t I2C_Config;
+	uint8_t *pTxBuffer;			// to store application tx buffer address
+	uint8_t *pRxBuffer;			// to store application rx buffer address
+	uint32_t TxLen;				// to store Tx length
+	uint32_t RxLen;				//to store Rx length
+	uint8_t TxRxState;			//to store communication state
+	uint8_t DevAddr;			//to store device/ slave address
+	uint32_t RxSize;			//to store Rx size
+	uint8_t Sr;					// to store repeated start value
 }I2C_Handle_t;
+
+
+/*
+ * I2C Application states
+ */
+#define I2C_READY				0
+#define I2C_BUSY_IN_RX			1
+#define I2C_BUSY_IN_TX			2
+
 
 
 /*
@@ -75,6 +92,23 @@ typedef struct{
 
 
 /*
+ * I2C Application Event Macro
+ */
+
+#define I2C_EV_TX_CMPLT			0
+#define I2C_EV_RX_CMPLT			1
+#define I2C_EV_STOP				2
+
+
+#define I2C_ERROR_BERR  		3
+#define I2C_ERROR_ARLO 			4
+#define I2C_ERROR_AF    		5
+#define I2C_ERROR_OVR   		6
+#define I2C_ERROR_TIMEOUT		7
+
+
+
+/*
 ******************************************************************************************
  *								APIs supported by this driver
  *		 For more information about the APIs check the function definitions
@@ -96,7 +130,23 @@ void I2C_DeInit(I2C_RegDef_t *pI2Cx);
  * Data Send and Receive
  */
 
-void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxbuffer, uint32_t Len, uint8_t SlaveAddr);
+void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxbuffer, uint32_t Len, uint8_t SlaveAddr, uint8_t SR);
+void I2C_MasterReceiveData(I2C_Handle_t *pI2CHandle,uint8_t *pRxBuffer, uint8_t Len, uint8_t SlaveAddr, uint8_t SR);
+
+
+/*
+ * Data Send and Receive using NonBlocking or Interrupt Mode
+ * This API return the Application state
+ */
+
+uint8_t I2C_MasterSendDataIT(I2C_Handle_t *pI2CHandle, uint8_t *pTxbuffer, uint32_t Len, uint8_t SlaveAddr, uint8_t SR);
+uint8_t I2C_MasterReceiveDataIT(I2C_Handle_t *pI2CHandle,uint8_t *pRxBuffer, uint8_t Len, uint8_t SlaveAddr, uint8_t SR);
+
+
+void I2C_CloseReceiveData(I2C_Handle_t *pI2CHandle);
+void I2C_CloseSendData(I2C_Handle_t *pI2CHandle);
+
+
 
 
 /*
@@ -104,6 +154,9 @@ void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxbuffer, uint32_t L
  */
 void I2C_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi);
 void I2C_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority);
+
+void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle); // for Event interrupt
+void I2C_ER_IRQHandling(I2C_Handle_t *pI2CHandle); // for Error  interrupt
 
 /*
  * Other Peripheral Control APIs
