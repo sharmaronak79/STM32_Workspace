@@ -16,7 +16,7 @@ static void I2C_GenerateStartCondition(I2C_RegDef_t *pI2Cx);
 static void I2C_ExecuteAddressPhaseWrite(I2C_RegDef_t *pI2Cx, uint8_t SlaveAddr);
 static void I2C_ExecuteAddressPhaseRead(I2C_RegDef_t *pI2Cx, uint8_t SlaveAddr);
 static void I2C_ClearADDRFlag(I2C_Handle_t *pI2CHandle);
-static void I2C_GenerateStopCondition(I2C_RegDef_t *pI2Cx);
+
 
 static void I2C_MasterHandleTXEInterrupt(I2C_Handle_t *pI2CHandle);
 static void I2C_MasterHandleRXNEInterrupt(I2C_Handle_t *pI2CHandle);
@@ -79,7 +79,7 @@ static void I2C_ClearADDRFlag(I2C_Handle_t *pI2CHandle){
 
 }
 
-static void I2C_GenerateStopCondition(I2C_RegDef_t *pI2Cx){
+void I2C_GenerateStopCondition(I2C_RegDef_t *pI2Cx){
 
 	pI2Cx->CR1 |= (1 << I2C_CR1_STOP);
 
@@ -592,7 +592,7 @@ void I2C_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority){
 
 void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle){
 
-		//Interrupt handling for master and slave m ode of a device
+		//Interrupt handling for master and slave mode of a device
 	uint32_t temp1, temp2, temp3;
 	temp1 = pI2CHandle->pI2Cx->CR2 & (1 << I2C_CR2_ITEVTEN);
 	temp2 = pI2CHandle->pI2Cx->CR2 & (1 << I2C_CR2_ITBUFEN);
@@ -604,7 +604,7 @@ void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle){
 	if(temp1 && temp3){
 		//This interrupt is generated because of SB event
 		//This block will not be executed in slave mode because for slave SB is always zero
-		//In this block ;ets execute the address phase
+		//In this block lets execute the address phase
 
 		if(pI2CHandle->TxRxState == I2C_BUSY_IN_TX){
 
@@ -699,6 +699,14 @@ void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle){
 				I2C_MasterHandleTXEInterrupt(pI2CHandle);
 
 			}
+		}else{
+
+			//slave
+			//make sure that the slave is really in transmitter mode
+		    if(pI2CHandle->pI2Cx->SR2 & ( 1 << I2C_SR2_TRA))
+		    {
+		    	I2C_ApplicationEventCallback(pI2CHandle,I2C_EV_DATA_REQ);
+		    }
 		}
 	}
 
@@ -720,6 +728,14 @@ void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle){
 				 }
 			}
 
+		}else
+		{
+			//slave
+			//make sure that the slave is really in receiver mode
+			if(!(pI2CHandle->pI2Cx->SR2 & ( 1 << I2C_SR2_TRA)))
+			{
+				I2C_ApplicationEventCallback(pI2CHandle,I2C_EV_DATA_RCV);
+			}
 		}
 }
 
@@ -851,8 +867,9 @@ void I2C_ER_IRQHandling(I2C_Handle_t *pI2CHandle)
 		//This is arbitration lost error
 
 		//Implement the code to clear the arbitration lost error flag
-
+		pI2CHandle->pI2Cx->SR1 &= ~( 1 << I2C_SR1_ARLO);
 		//Implement the code to notify the application about the error
+		I2C_ApplicationEventCallback(pI2CHandle,I2C_ERROR_ARLO);
 
 	}
 
@@ -864,8 +881,9 @@ void I2C_ER_IRQHandling(I2C_Handle_t *pI2CHandle)
 		//This is ACK failure error
 
 	    //Implement the code to clear the ACK failure error flag
-
+		pI2CHandle->pI2Cx->SR1 &= ~( 1 << I2C_SR1_AF);
 		//Implement the code to notify the application about the error
+		I2C_ApplicationEventCallback(pI2CHandle,I2C_ERROR_AF);
 	}
 
 /***********************Check for Overrun/underrun error************************************/
@@ -875,8 +893,9 @@ void I2C_ER_IRQHandling(I2C_Handle_t *pI2CHandle)
 		//This is Overrun/underrun
 
 	    //Implement the code to clear the Overrun/underrun error flag
-
+		pI2CHandle->pI2Cx->SR1 &= ~( 1 << I2C_SR1_OVR);
 		//Implement the code to notify the application about the error
+		I2C_ApplicationEventCallback(pI2CHandle,I2C_ERROR_OVR);
 	}
 
 /***********************Check for Time out error************************************/
@@ -886,10 +905,23 @@ void I2C_ER_IRQHandling(I2C_Handle_t *pI2CHandle)
 		//This is Time out error
 
 	    //Implement the code to clear the Time out error flag
-
+		pI2CHandle->pI2Cx->SR1 &= ~( 1 << I2C_SR1_TIMEOUT);
 		//Implement the code to notify the application about the error
+		I2C_ApplicationEventCallback(pI2CHandle,I2C_ERROR_TIMEOUT);
 	}
 
+}
+
+
+/*
+ * I2C Slave MOde APIs
+ */
+
+uint8_t I2C_SlaveSendDataIT(I2C_RegDef_t *pI2C , uint8_t data){
+	pI2C->DR = data;
+}
+uint8_t I2C_SlaveReceiveDataIT(I2C_RegDef_t *pI2C){
+	return (uint8_t) pI2C->DR;
 }
 
 
