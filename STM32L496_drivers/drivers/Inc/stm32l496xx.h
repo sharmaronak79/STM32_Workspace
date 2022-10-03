@@ -53,7 +53,7 @@
 
 /* Base Address of Peripherals hanging on AHB1 Bus*/
 
-#define RCC					0x40021000U
+#define RCC_BASEADDR		0x40021000U
 
 /* Base Address of Peripherals hanging on AHB2 Bus */
 
@@ -105,7 +105,7 @@ typedef struct{
 	__vo uint32_t ODR;							/*!< GPIO port output data register              	   Address offset: 0x14     */
 	__vo uint32_t BSRR;							/*!< GPIO port bit set/reset register            	   Address offset: 0x18     */
 	__vo uint32_t LCKR;							/*!< GPIO port configuration lock register       	   Address offset: 0x1c     */
-	__vo uint32_t AFRL;					        /*!< AFR[0] : GPIO alternate function low register     Address offset: 0x20     */
+	__vo uint32_t AFRL;					        /*!<  GPIO alternate function low register     		   Address offset: 0x20     */
 	__vo uint32_t AFRH;							/* GPIO alternate function high register			   Address offset: 0x24     */
 	__vo uint32_t BRR;							/* GPIO Port Bit Reset Register*/
 	__vo uint32_t ASCR;							/* GPIO Port Analog Switch Control Register */
@@ -162,7 +162,62 @@ typedef struct{
 }RCC_RegDef_t;
 
 
+/* Peripheral Definitions (Peripheral base adress type casted to RegDef_t)*/
 
+#define GPIOA									((GPIO_RegDef_t*)GPIOA_BASEADDR)
+#define GPIOB									((GPIO_RegDef_t*)GPIOB_BASEADDR)
+#define GPIOC									((GPIO_RegDef_t*)GPIOC_BASEADDR)
+#define GPIOD									((GPIO_RegDef_t*)GPIOD_BASEADDR)
+#define GPIOE									((GPIO_RegDef_t*)GPIOE_BASEADDR)
+#define GPIOF									((GPIO_RegDef_t*)GPIOF_BASEADDR)
+#define GPIOG									((GPIO_RegDef_t*)GPIOG_BASEADDR)
+#define GPIOH									((GPIO_RegDef_t*)GPIOH_BASEADDR)
+#define GPIOI									((GPIO_RegDef_t*)GPIOI_BASEADDR)
+
+
+
+#define RCC	                                    ((RCC_RegDef_t*)RCC_BASEADDR)
+#define EXTI									((EXTI_RegDef_t*)EXTI_BASEADDR)
+#define SYSCFG									((SYSCFG_RegDef_t*)SYSCFG_BASEADDR)
+
+
+#define SPI1									((SPI_RegDef_t*)SPI1_BASEADDR)
+#define SPI2									((SPI_RegDef_t*)SPI2_BASEADDR)
+#define SPI3									((SPI_RegDef_t*)SPI3_BASEADDR)
+#define SPI4									((SPI_RegDef_t*)SPI4_BASEADDR)
+
+
+#define I2C1									((I2C_RegDef_t*)I2C1_BASEADDR)
+#define I2C2									((I2C_RegDef_t*)I2C2_BASEADDR)
+#define I2C3									((I2C_RegDef_t*)I2C3_BASEADDR)
+
+/* Clock Enable MAcros for GPIOx Peripherals */
+#define GPIOA_PCLK_EN()                         RCC->AHB2ENR |= (1 << 0)
+#define GPIOB_PCLK_EN()                         RCC->AHB2ENR |= (1 << 1)
+#define GPIOC_PCLK_EN()                         RCC->AHB2ENR |= (1 << 2)
+#define GPIOD_PCLK_EN()                         RCC->AHB2ENR |= (1 << 3)
+#define GPIOE_PCLK_EN()                         RCC->AHB2ENR |= (1 << 4)
+#define GPIOF_PCLK_EN()                         RCC->AHB2ENR |= (1 << 5)
+#define GPIOG_PCLK_EN()                         RCC->AHB2ENR |= (1 << 6)
+#define GPIOH_PCLK_EN()                         RCC->AHB2ENR |= (1 << 7)
+#define GPIOI_PCLK_EN()                         RCC->AHB2ENR |= (1 << 8)
+
+
+/* Clock Disable MAcros for GPIOx Peripherals */
+#define GPIOA_PCLK_DI()                         RCC->AHB2ENR &= ~(1 << 0)
+#define GPIOB_PCLK_DI()                         RCC->AHB2ENR &= ~(1 << 1)
+#define GPIOC_PCLK_DI()                         RCC->AHB2ENR &= ~(1 << 2)
+#define GPIOD_PCLK_DI()                         RCC->AHB2ENR &= ~(1 << 3)
+#define GPIOE_PCLK_DI()                         RCC->AHB2ENR &= ~(1 << 4)
+#define GPIOF_PCLK_DI()                         RCC->AHB2ENR &= ~(1 << 5)
+#define GPIOG_PCLK_DI()                         RCC->AHB2ENR &= ~(1 << 6)
+#define GPIOH_PCLK_DI()                         RCC->AHB2ENR &= ~(1 << 7)
+#define GPIOI_PCLK_DI()                         RCC->AHB2ENR &= ~(1 << 8)
+
+
+
+
+#include "stm32l496_gpio_driver.h"
 #endif /* INC_STM32L496XX_H_ */
 
 

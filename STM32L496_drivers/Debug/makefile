@@ -59,8 +59,8 @@ all: main-build
 main-build: STM32L496_drivers.elf secondary-outputs
 
 # Tool invocations
-STM32L496_drivers.elf STM32L496_drivers.map: $(OBJS) $(USER_OBJS) U:\STProject\WorkSpace\STM32L496_drivers\STM32L496AGIX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "STM32L496_drivers.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"U:\STProject\WorkSpace\STM32L496_drivers\STM32L496AGIX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32L496_drivers.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+STM32L496_drivers.elf STM32L496_drivers.map: $(OBJS) $(USER_OBJS) C:\Users\ronakkumar_sharma\Desktop\ST_Workspace\STM32L496_drivers\STM32L496AGIX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "STM32L496_drivers.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\ronakkumar_sharma\Desktop\ST_Workspace\STM32L496_drivers\STM32L496AGIX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32L496_drivers.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

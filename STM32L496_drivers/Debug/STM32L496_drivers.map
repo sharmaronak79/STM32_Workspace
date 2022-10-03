@@ -154,7 +154,7 @@ Discarded input sections
  .debug_macro   0x0000000000000000       0x16 ./Src/syscalls.o
  .debug_macro   0x0000000000000000       0xce ./Src/syscalls.o
  .debug_line    0x0000000000000000      0x7ef ./Src/syscalls.o
- .debug_str     0x0000000000000000     0x8a78 ./Src/syscalls.o
+ .debug_str     0x0000000000000000     0x8a91 ./Src/syscalls.o
  .comment       0x0000000000000000       0x51 ./Src/syscalls.o
  .debug_frame   0x0000000000000000      0x2ac ./Src/syscalls.o
  .ARM.attributes
@@ -216,7 +216,7 @@ Discarded input sections
  .debug_macro   0x0000000000000000       0x6a ./Src/sysmem.o
  .debug_macro   0x0000000000000000      0x1df ./Src/sysmem.o
  .debug_line    0x0000000000000000      0x4e5 ./Src/sysmem.o
- .debug_str     0x0000000000000000     0x5db4 ./Src/sysmem.o
+ .debug_str     0x0000000000000000     0x5dcd ./Src/sysmem.o
  .comment       0x0000000000000000       0x51 ./Src/sysmem.o
  .debug_frame   0x0000000000000000       0x34 ./Src/sysmem.o
  .ARM.attributes
@@ -599,18 +599,17 @@ LOAD c:/st/stm32cubeide_1.10.1/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.ext
  .debug_ranges  0x0000000000000000       0x10 ./Src/main.o
  .debug_ranges  0x0000000000000010       0x20 ./Startup/startup_stm32l496agix.o
 
-.debug_macro    0x0000000000000000      0xa9f
- .debug_macro   0x0000000000000000       0x1b ./Src/main.o
- .debug_macro   0x000000000000001b      0xa84 ./Src/main.o
+.debug_macro    0x0000000000000000      0xa95
+ .debug_macro   0x0000000000000000       0x11 ./Src/main.o
+ .debug_macro   0x0000000000000011      0xa84 ./Src/main.o
 
-.debug_line     0x0000000000000000      0x110
- .debug_line    0x0000000000000000       0x8c ./Src/main.o
- .debug_line    0x000000000000008c       0x84 ./Startup/startup_stm32l496agix.o
+.debug_line     0x0000000000000000       0xca
+ .debug_line    0x0000000000000000       0x46 ./Src/main.o
+ .debug_line    0x0000000000000046       0x84 ./Startup/startup_stm32l496agix.o
 
-.debug_str      0x0000000000000000     0x2d25
- .debug_str     0x0000000000000000     0x2cf4 ./Src/main.o
- .debug_str     0x0000000000002cf4       0x31 ./Startup/startup_stm32l496agix.o
-                                         0x60 (size before relaxing)
+.debug_str      0x0000000000000000     0x2d59
+ .debug_str     0x0000000000000000     0x2cf9 ./Src/main.o
+ .debug_str     0x0000000000002cf9       0x60 ./Startup/startup_stm32l496agix.o
 
 .comment        0x0000000000000000       0x50
  .comment       0x0000000000000000       0x50 ./Src/main.o
