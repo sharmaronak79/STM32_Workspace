@@ -49,9 +49,9 @@
 
 /* Base Address of Flash and SRAM memory */
 
-#define FLASH_BASEADDR		0x80000000U
+#define FLASH_BASEADDR		0x08000000U
 #define SRAM1_BASEADDR		0x20000000U
-#define SRAM2_BASEADDR		0x2001C000U
+#define SRAM2_BASEADDR		0x20001C00U
 #define ROM_BASEADDR		0x1FFF0000U
 #define RAM 				SRAM1_BASEADDR
 
@@ -247,6 +247,8 @@ typedef struct{
 	__vo uint32_t FLTR;
 }I2C_RegDef_t;
 
+
+
 /*
  * peripheral register definition structure for USART
  */
@@ -259,8 +261,7 @@ typedef struct
 	__vo uint32_t CR2;        /*!< TODO,     										Address offset: 0x10 */
 	__vo uint32_t CR3;        /*!< TODO,     										Address offset: 0x14 */
 	__vo uint32_t GTPR;       /*!< TODO,     										Address offset: 0x18 */
-} USART_RegDef_t;
-
+}USART_RegDef_t;
 
 
 /*
@@ -292,6 +293,15 @@ typedef struct
 #define I2C1									((I2C_RegDef_t*)I2C1_BASEADDR)
 #define I2C2									((I2C_RegDef_t*)I2C2_BASEADDR)
 #define I2C3									((I2C_RegDef_t*)I2C3_BASEADDR)
+
+
+#define USART1									((USART_RegDef_t*)USART1_BASEADDR)
+#define USART2									((USART_RegDef_t*)USART2_BASEADDR)
+#define USART3									((USART_RegDef_t*)USART3_BASEADDR)
+#define UART4									((USART_RegDef_t*)UART4_BASEADDR)
+#define UART5									((USART_RegDef_t*)UART5_BASEADDR)
+#define USART6									((USART_RegDef_t*)USART6_BASEADDR)
+
 
 
 /*
@@ -453,6 +463,12 @@ typedef struct
 #define IRQ_NO_I2C2_ER		34
 #define IRQ_NO_I2C3_EV		72
 #define IRQ_NO_I2C3_ER		73
+#define IRQ_NO_USART1	    37
+#define IRQ_NO_USART2	    38
+#define IRQ_NO_USART3	    39
+#define IRQ_NO_UART4	    52
+#define IRQ_NO_UART5	    53
+#define IRQ_NO_USART6	    71
 
 
 /*
@@ -620,6 +636,20 @@ typedef struct
 #define I2C2_REG_RESET()        				    do{ RCC->APB1RSTR |= (1<<22);	    RCC->APB1RSTR &= ~(1<<22);}while(0)
 #define I2C3_REG_RESET()        				    do{ RCC->APB1RSTR |= (1<<23);	    RCC->APB1RSTR &= ~(1<<23);}while(0)
 
+
+
+/*
+ * Macros to reset USARTx and UARTx peripherals
+ */
+
+#define USART1_REG_RESET()        				    do{ RCC->APB2RSTR |= (1<<4);	    RCC->APB2RSTR &= ~(1<<4);}while(0)
+#define USART2_REG_RESET()        				    do{ RCC->APB1RSTR |= (1<<17);	    RCC->APB1RSTR &= ~(1<<17);}while(0)
+#define USART3_REG_RESET()        				    do{ RCC->APB1RSTR |= (1<<18);	    RCC->APB1RSTR &= ~(1<<18);}while(0)
+#define UART4_REG_RESET()        				    do{ RCC->APB1RSTR |= (1<<19);	    RCC->APB1RSTR &= ~(1<<19);}while(0)
+#define UART5_REG_RESET()        				    do{ RCC->APB1RSTR |= (1<<20);	    RCC->APB1RSTR &= ~(1<<20);}while(0)
+#define USART6_REG_RESET()        				    do{ RCC->APB2RSTR |= (1<<5);	    RCC->APB2RSTR &= ~(1<<5);}while(0)
+
+
 /******************************************************************************************
  *Bit position definitions of USART peripheral
  ******************************************************************************************/
@@ -689,9 +719,13 @@ typedef struct
 #define USART_SR_LBD        			8
 #define USART_SR_CTS        			9
 
-#include "stm32f407xx_gpio_driver.h"
+
+#include "stm32f407xx_usart_driver.h"
 #include "stm32f407xx_gpio_driver.h"
 #include "stm32f407xx_spi_driver.h"
 #include "stm32f407xx_i2c_driver.h"
+#include "stm32f407xx_rcc_driver.h"
+
+
 
 #endif /* INC_STM32F407XX_H_ */
