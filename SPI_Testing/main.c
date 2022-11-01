@@ -65,10 +65,13 @@ static void MX_SPI1_Init(void);
 int main(void)
 {
 
-char spi_buf[50];  //SPI  buffer to send and receive data
+  char spi_buf[10] ;  //SPI  buffer to send and receive data
 
-uint8_t R1 = {0x01}; //Address of R1
-uint8_t R2 = {0x02}; //Address of R2
+  uint8_t R1 = {0x67}; //Address of Slave Register R1(0x42) and Data
+  char *TrData = "Ronak";
+
+  uint8_t R2 = {0x43}; //Address of R2
+
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
@@ -92,34 +95,53 @@ uint8_t R2 = {0x02}; //Address of R2
 
 
 
-  // 1. CS pin should default high
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, GPIO_PIN_SET);
-
-
-
-
-  //2. Enable write enable latch (Allow write operations)
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, GPIO_PIN_RESET); // make CS line low
-  HAL_SPI_Transmit(&hspi1, &R1 , 1, 100); // here we want to send only 1 byte so it is 1 here in 3rd parameter
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, GPIO_PIN_SET); // make CS line high
-
-
-  //3. Read status Register
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, GPIO_PIN_RESET); // make CS line low
-  HAL_SPI_Transmit(&hspi1, &R2 , 1, 100);
-  HAL_SPI_Receive(&hspi1, (uint8_t *)spi_buf, 1, 100);
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, GPIO_PIN_RESET); // make CS line high
-
-
-
-
-
 
   while (1)
   {
-    /* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
+
+	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_RESET);
+	   while(! HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13));
+	   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_SET);
+
+
+	   // 1. CS pin should default high
+	   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, GPIO_PIN_SET);
+
+
+
+
+	   //2. write enable latch (Allow write operations)
+	   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, GPIO_PIN_RESET); // make CS line low
+	   HAL_SPI_Transmit(&hspi1, &R1 , 1, 100); // here we want to send only 1 byte so it is 1 here in 3rd parameter
+	   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, GPIO_PIN_SET); // make CS line high
+
+	   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, GPIO_PIN_RESET); // make CS line low
+	    HAL_SPI_Transmit(&hspi1, (uint8_t *)TrData , sizeof(TrData)+1, 100);
+	   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, GPIO_PIN_SET); // make CS line high
+
+
+
+
+	    HAL_Delay(100);
+
+	    // write the DATA of R2 register
+	    //2. Enable write enable latch (Allow write operations)
+	   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, GPIO_PIN_RESET); // make CS line low
+	   HAL_SPI_Transmit(&hspi1, &R2 , 1, 100); // here we want to send only 1 byte so it is 1 here in 3rd parameter
+	   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, GPIO_PIN_SET); // make CS line high
+
+	   HAL_Delay(100);
+
+	   //3. Read Operation
+	   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, GPIO_PIN_RESET); // make CS line low
+	   //HAL_SPI_Transmit(&hspi1, &R2 , 1, 100);
+	   HAL_SPI_Receive(&hspi1, (uint8_t *)spi_buf, 5, 100);
+	   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, GPIO_PIN_SET); // make CS line high
+
+	   HAL_Delay(100);
+
+
   }
   /* USER CODE END 3 */
 }
