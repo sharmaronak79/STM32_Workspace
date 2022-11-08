@@ -20,6 +20,7 @@
 #include "main.h"
 #include "usb_host.h"
 #include<string.h>
+#include<stdio.h>
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -60,6 +61,7 @@ uint8_t convert_to_capital(uint8_t Data);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 char *user_data = "Applicaton is running\r\n";
+char msg[50];
 /* USER CODE END 0 */
 
 /**
@@ -113,6 +115,22 @@ int main(void)
 
   data_buffer[count++]='\r';
   HAL_UART_Transmit(&hlpuart1, data_buffer, count, HAL_MAX_DELAY);
+
+  memset(msg,0,sizeof(msg));
+  	sprintf(msg,"SYSCLK : %ldHz\r\n",HAL_RCC_GetSysClockFreq());
+  	HAL_UART_Transmit(&hlpuart1,(uint8_t*)msg,strlen(msg),HAL_MAX_DELAY);
+
+  	memset(msg,0,sizeof(msg));
+  	sprintf(msg,"HCLK   : %ldHz\r\n",HAL_RCC_GetHCLKFreq());
+  	HAL_UART_Transmit(&hlpuart1,(uint8_t*)msg,strlen(msg),HAL_MAX_DELAY);
+
+  	memset(msg,0,sizeof(msg));
+  	sprintf(msg,"PCLK1  : %ldHz\r\n",HAL_RCC_GetPCLK1Freq());
+  	HAL_UART_Transmit(&hlpuart1,(uint8_t*)msg,strlen(msg),HAL_MAX_DELAY);
+
+  	memset(msg,0,sizeof(msg));
+  	sprintf(msg,"PCLK2  : %ldHz\r\n",HAL_RCC_GetPCLK2Freq());
+  	HAL_UART_Transmit(&hlpuart1,(uint8_t*)msg,strlen(msg),HAL_MAX_DELAY);
 
 
 
@@ -190,6 +208,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV4;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
   {
