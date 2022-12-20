@@ -1,0 +1,1 @@
+Using TIMER peripheral I have generated 100mSec of Delay
