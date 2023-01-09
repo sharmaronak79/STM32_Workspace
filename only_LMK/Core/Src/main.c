@@ -19,7 +19,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "usb_host.h"
-#include <string.h>
+#include<string.h>
+#include<stdio.h>
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -71,39 +72,140 @@ void MX_USB_HOST_Process(void);
 int main(void)
 {
 
+  HAL_Init();
+  SystemClock_Config();
+
+  MX_GPIO_Init();
+  MX_USB_HOST_Init();
+  MX_SPI1_Init();
+  MX_USART3_UART_Init();
+
+  uint8_t R44 = 0x2C;
+  uint8_t R44_data[2]={0x00,0x00};
+
+  uint8_t R45 = 0x2D;
+  uint8_t R45_data[2]={0x00,0x00};
+
+  uint8_t R36 = 0x24;
+  uint8_t R36_data[2]={0x00,0x1E};
+
+  uint8_t R43 = 0x2B;
+  uint8_t R43_data[2]={0x00,0x00};
+
+  uint8_t R0 = 0x00;
+  uint8_t R0_data[2]={0x64,0x70};
+
+  uint8_t Rx_Data[2]={0x00,0x00};
+
+  uint8_t Buf[]="Application is Running\n";
+  HAL_UART_Transmit(&huart3, Buf, strlen((char *)Buf), 1000);
 
 
-	  HAL_Init();
-	  SystemClock_Config();
-	  /* Initialize all configured peripherals */
-	  MX_GPIO_Init();
-	  MX_USB_HOST_Init();
-	  MX_SPI1_Init();
-	  MX_USART3_UART_Init();
-	  uint8_t Buf[]="Application is Running\n";
-
-	  HAL_UART_Transmit(&huart3, Buf, strlen((char*)Buf), HAL_MAX_DELAY);
-
-		  char spi_buf[20];
-		  uint8_t addr;
-	  	//Slave register address
-		  addr=0x4F;
-		  spi_buf[0]= 0x01;
-		  spi_buf[1]= 0x1E;
-		  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_12, GPIO_PIN_SET);
-	  while (1)
-	  {
-	    while(! HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13));
-	    HAL_Delay(200);
-	   HAL_GPIO_WritePin(GPIOF, GPIO_PIN_12, GPIO_PIN_RESET);//CS pin low
-	   HAL_SPI_Transmit(&hspi1, (uint8_t *)&addr, 1, 100); // transmit address
-	   HAL_SPI_Transmit(&hspi1, (uint8_t *)spi_buf, 2, 100);//transmit data
-	   HAL_GPIO_WritePin(GPIOF, GPIO_PIN_12, GPIO_PIN_SET);//CS pin high
+  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_12, GPIO_PIN_SET);
+  while (1)
+  {
+	  while(! HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13));
+	  HAL_Delay(200);
 
 
-	  }
-	  /* USER CODE END 3 */
+	  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_12, GPIO_PIN_RESET);
+	  HAL_SPI_Transmit(&hspi1, &R44, 1, 1000);
+	  HAL_SPI_Transmit(&hspi1, R44_data, 2, 1000);
+	  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_12, GPIO_PIN_SET);
+
+	  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_12, GPIO_PIN_RESET);
+	  HAL_SPI_Transmit(&hspi1, &R45, 1, 1000);
+	  HAL_SPI_Transmit(&hspi1, R45_data, 2, 1000);
+	  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_12, GPIO_PIN_SET);
+
+	  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_12, GPIO_PIN_RESET);
+	  HAL_SPI_Transmit(&hspi1, &R36, 1, 1000);
+	  HAL_SPI_Transmit(&hspi1, R36_data, 2, 1000);
+	  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_12, GPIO_PIN_SET);
+
+	  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_12, GPIO_PIN_RESET);
+	  HAL_SPI_Transmit(&hspi1, &R43, 1, 1000);
+	  HAL_SPI_Transmit(&hspi1, R43_data, 2, 1000);
+	  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_12, GPIO_PIN_SET);
+
+	  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_12, GPIO_PIN_RESET);
+	  HAL_SPI_Transmit(&hspi1, &R0, 1, 1000);
+	  HAL_SPI_Transmit(&hspi1, R0_data, 2, 1000);
+	  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_12, GPIO_PIN_SET);
+
+	  strcpy((char *)Buf,"Programming is Done\n");
+	  HAL_UART_Transmit(&huart3, Buf, strlen((char *)Buf), 1000);
+
+	  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_12, GPIO_PIN_RESET);
+	  HAL_SPI_Receive(&hspi1, &R0, 1, 1000);
+	  HAL_SPI_Receive(&hspi1,Rx_Data, 2, 1000);
+	  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_12, GPIO_PIN_SET);
+
+	  sprintf((char *)Buf,"Data is : 0x%x 0x%x",Rx_Data[0],Rx_Data[1]);
+	  HAL_UART_Transmit(&huart3, Buf, strlen((char *)Buf), 1000);
+
+  }
+
 }
+
+/*
+ *
+ *Register values for Reset GUI
+  uint8_t R44 = 0x2C;
+  uint8_t R44_data[2]={0x00,0x00};
+
+  uint8_t R45 = 0x2D;
+  uint8_t R45_data[2]={0x00,0x00};
+
+  uint8_t R36 = 0x24;
+  uint8_t R36_data[2]={0x00,0x1E};
+
+  uint8_t R43 = 0x2B;
+  uint8_t R43_data[2]={0x00,0x00};
+
+  uint8_t R0 = 0x00;
+  uint8_t R0_data[2]={0x64,0x70};
+
+  //Register value for 100 MHz
+   *
+  uint8_t R44 = 0x2C;
+  uint8_t R44_data[2]={0x00,0x00};
+
+  uint8_t R45 = 0x2D;
+  uint8_t R45_data[2]={0x00,0x00};
+
+  uint8_t R36 = 0x24;
+  uint8_t R36_data[2]={0x00,0x20};
+
+  uint8_t R43 = 0x2B;
+  uint8_t R43_data[2]={0x00,0x00};
+
+  uint8_t R0 = 0x00;
+  uint8_t R0_data[2]={0x64,0x70};
+
+
+  //Register value for 90 MHz
+   *
+  uint8_t R44 = 0x2C;
+  uint8_t R44_data[2]={0xCC,0xCC};
+
+  uint8_t R45 = 0x2D;
+  uint8_t R45_data[2]={0xCC,0xCD};
+
+  uint8_t R36 = 0x24;
+  uint8_t R36_data[2]={0x00,0x1C};
+
+  uint8_t R43 = 0x2B;
+  uint8_t R43_data[2]={0x01,0x40};
+
+  uint8_t R0 = 0x00;
+  uint8_t R0_data[2]={0x64,0x70};
+
+ */
+
+
+
+
 
 /**
   * @brief System Clock Configuration
@@ -186,15 +288,15 @@ static void MX_SPI1_Init(void)
   hspi1.Init.Direction = SPI_DIRECTION_2LINES;
   hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;
+  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
   hspi1.Init.CRCPolynomial = 7;
   hspi1.Init.CRCLength = SPI_CRC_LENGTH_DATASIZE;
-  hspi1.Init.NSSPMode = SPI_NSS_PULSE_DISABLE;
+  hspi1.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
   if (HAL_SPI_Init(&hspi1) != HAL_OK)
   {
     Error_Handler();
