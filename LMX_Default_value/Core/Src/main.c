@@ -116,7 +116,7 @@ uint8_t S_Buf[250]="Application is Running\n";
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
+    while(! HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13));
     LMX_93_75MHz_setup();
 
   }
