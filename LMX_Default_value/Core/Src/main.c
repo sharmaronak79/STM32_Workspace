@@ -60,7 +60,8 @@ static void MX_USART3_UART_Init(void);
 void MX_USB_HOST_Process(void);
 
 /* USER CODE BEGIN PFP */
-void Default_LMX_setup(void); //function for 93.75MHz default setting
+void Default_LMX_setup(void);
+void LMX_93_75MHz_setup(void);//function for 93.75MHz default setting
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -103,6 +104,9 @@ uint8_t S_Buf[250]="Application is Running\n";
   /* USER CODE BEGIN 2 */
 
   HAL_UART_Transmit(&huart3, S_Buf, strlen((char*)S_Buf),1000);
+  //CS pin, keep it high
+  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_12, GPIO_PIN_SET);
+
   Default_LMX_setup();
 
 
@@ -112,23 +116,71 @@ uint8_t S_Buf[250]="Application is Running\n";
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* USER CODE END WHILE */
-    MX_USB_HOST_Process();
 
-    /* USER CODE BEGIN 3 */
+    LMX_93_75MHz_setup();
+
   }
   /* USER CODE END 3 */
 }
 
-
 /*
- * @brief Default function for 93.75MHz frequency setup
+ * @brief Default function for LMX setup
  * @Param None
  * @retval None
  */
 void Default_LMX_setup(void){
 
+	int R[123]={0x7A0000, 0x790000, 0x780000, 0x770000, 0x760000, 0x750000, 0x740000, 0x730000, 0x720000, 0x710000,
+				0x70FFFF, 0x6F0000, 0x6E001F, 0x6D0000, 0x6C0000, 0x6B0000, 0x6A0000, 0x69000A, 0x680014, 0x670014,
+				0x660028, 0x6503E8, 0x640533, 0x6319B9, 0x621C80, 0x610000, 0x6017F8, 0x5F0000, 0x5E0000, 0x5D1000,
+				0x5C0000, 0x5B0000, 0x5A0000, 0x590000, 0x5803FF, 0x57FF00, 0x560040, 0x550000, 0x540040, 0x530F00,
+				0x520000, 0x510000, 0x5001C0, 0x4F010E, 0x4E0002, 0x4D0608, 0x4C0000, 0x4B0000, 0x4A0000, 0x490000,
+				0x480000, 0x470000, 0x46000E, 0x450011, 0x440000, 0x431000, 0x42003F, 0x410000, 0x400080, 0x3FC350,
+				0x3E0000, 0x3D03E8, 0x3C01F4, 0x3B1388, 0x3A0000, 0x390001,	0x380001, 0x370002, 0x360000, 0x350000,
+				0x340000, 0x33203F, 0x320080, 0x310000, 0x304180, 0x2F0300, 0x2E0300, 0x2DD70A, 0x2C40A3, 0x2B0065,
+				0x2A0000, 0x290000, 0x280000, 0x270190, 0x260000, 0x250500, 0x24001C, 0x233180, 0x220010, 0x210000,
+				0x201B81, 0x1F0401, 0x1EB18C, 0x1D318C, 0x1C0639, 0x1B8001, 0x1A0DB0, 0x190624, 0x180E34, 0x171102,
+				0x16E2BF, 0x151C64, 0x14272C, 0x132120, 0x120000, 0x1115C0, 0x101712, 0x0F2001, 0x0E3001, 0x0D0038,
+				0x0C0408, 0x0B0602, 0x0A0000, 0x090005, 0x08C802, 0x070000, 0x060A43, 0x050032, 0x044204, 0x030041,
+				0x0281F4, 0x01D7A0, 0x006470};
 
+	uint8_t S_Buf[50];
+	uint8_t Adr;
+	uint8_t data[2];
+
+
+	Adr=0x00;
+	data[0]=0x00;
+	data[1]=0x00;
+
+	for(int8_t i=0;i<=122;i++)
+	{
+		//Bit wise operations to get the address and data to be sent
+		Adr = (R[i] & 0xFF0000)>>16;
+		data[0]=(R[i] & 0xFF00)>>8;
+		data[1]=(R[i] & 0xFF);
+
+		sprintf((char *)S_Buf,"Address and Data : 0x%X 0x%X 0x%X \n",Adr,data[0],data[1]);
+		HAL_UART_Transmit(&huart3, S_Buf, strlen((char*)S_Buf),1000);
+
+		HAL_GPIO_WritePin(GPIOF, GPIO_PIN_12, GPIO_PIN_RESET);//CS Pin low
+		HAL_SPI_Transmit(&hspi1, &Adr, 1, 1000); //Transmit address
+		HAL_SPI_Transmit(&hspi1, &data[0], 2, 1000); //Transmit data
+		HAL_GPIO_WritePin(GPIOF, GPIO_PIN_12, GPIO_PIN_SET); // CS pin High
+	}
+
+   strcpy((char *)S_Buf,"Address and Data sent to registers \n");
+   HAL_UART_Transmit(&huart3, S_Buf, strlen((char*)S_Buf),1000);
+
+}
+/*
+ * @brief Default function for 93.75MHz frequency setup
+ * @Param None
+ * @retval None
+ */
+void LMX_93_75MHz_setup(void){
+
+	//Register values for 93.75MHz Frequency
 	int R[123]={0x006470,   0x0157A0,   0x0281F4,   0x030041,   0x044204,   0x050032,   0x060A43,   0x070000,   0x08C802,   0x090005,
 			    0x0A0000,   0x0B0612,	0x0C0408,   0x0D0038,	0x0E3001,   0x0F2001,	0x10171C,   0x1115C0,   0x120000,	0x132120,
 				0x14272C,	0x151C64,	0x16E2BF,	0x171102,	0x180E34,	0x190624,	0x1A0DB0,	0x1B8001,	0x1C0639,	0x1D318C,
@@ -150,16 +202,25 @@ void Default_LMX_setup(void){
 	Adr=0x00;
 	data[0]=0x00;
 	data[1]=0x00;
-    for(uint8_t i=122;i>=0;i--){
 
-	Adr = (R[i] & 0xFF0000)>>16;
-	data[0]=(R[i] & 0xFF00)>>8;
-	data[1]=(R[i] & 0xFF);
-	sprintf((char *)S_Buf,"Address and Data : 0x%X 0x%X 0x%X \n",Adr,data[0],data[1]);
-	HAL_UART_Transmit(&huart3, S_Buf, strlen((char*)S_Buf),1000);
+    for(int8_t i=122;i>=0;i--)
+    {
+    	//Bit wise operations to get the address and data to be sent
+		Adr = (R[i] & 0xFF0000)>>16;
+		data[0]=(R[i] & 0xFF00)>>8;
+		data[1]=(R[i] & 0xFF);
 
+		sprintf((char *)S_Buf,"Address and Data : 0x%X 0x%X 0x%X \n",Adr,data[0],data[1]);
+		HAL_UART_Transmit(&huart3, S_Buf, strlen((char*)S_Buf),1000);
+
+		HAL_GPIO_WritePin(GPIOF, GPIO_PIN_12, GPIO_PIN_RESET);//CS Pin low
+		HAL_SPI_Transmit(&hspi1, &Adr, 1, 1000); //Transmit address
+		HAL_SPI_Transmit(&hspi1, &data[0], 2, 1000); //Transmit data
+		HAL_GPIO_WritePin(GPIOF, GPIO_PIN_12, GPIO_PIN_SET); // CS pin High
     }
 
+   strcpy((char *)S_Buf,"Address and Data sent to registers \n");
+   HAL_UART_Transmit(&huart3, S_Buf, strlen((char*)S_Buf),1000);
 
 }
 
