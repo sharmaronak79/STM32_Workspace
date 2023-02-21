@@ -243,7 +243,7 @@ void test41(void){
 }
 
 /*
- * @brief Default function for LMX setup
+ * @brief Default function for LMX setup, These registers values are taken from the Tics PRO software
  * @Param None
  * @retval None
  */
