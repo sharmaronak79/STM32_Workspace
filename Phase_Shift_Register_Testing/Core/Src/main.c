@@ -195,8 +195,8 @@ int main(void)
  * @retval None
  */
 void test41(void){
-	uint8_t i=0x00;
-	static int k=0x00;
+	static uint8_t i=0x00;
+	static uint8_t k=0x00;
 	uint8_t Tx_R41[3]={0x29,k,i};
 	uint8_t Rx_41_Adr=0xA9;
 	uint8_t Rx_41_data[2];
@@ -237,7 +237,7 @@ void test41(void){
 	 i++;
 	 }
 
-	 while(k<105){
+	 while(k<106){
 
 	 	 Tx_R41[1]=k;
 	 	 while(!HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13));
