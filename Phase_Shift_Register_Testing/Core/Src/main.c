@@ -114,6 +114,12 @@ int main(void)
   /* USER CODE BEGIN 2 */
   HAL_UART_Transmit(&huart1, Buf, strlen((char*)Buf), 100);
 
+
+  strcpy((char*)Buf,"\nIn the Main loop\r\n");
+  HAL_UART_Transmit(&huart1, Buf, strlen((char*)Buf), 100);
+
+  LMX_default_RegConfig_Value_7point5_GHz();
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -123,11 +129,11 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
+/*
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET);
 	  while(!HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13));
 	  HAL_Delay(200);
-
+*/
 
 	  strcpy((char*)Buf,"\nIn the Main loop\r\n");
 	  HAL_UART_Transmit(&huart1, Buf, strlen((char*)Buf), 100);
@@ -136,10 +142,11 @@ int main(void)
 
 	  while(!HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13));
 	  HAL_Delay(200);
+
 	  test41();
+/*
 
-
-	  /*
+	  
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET); //CS pin low
 	  HAL_SPI_Transmit(&hspi3, Tx_R0, 3, 100); // SPI Transimt
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET); //CS high
@@ -203,7 +210,7 @@ void test41(void){
 
 	uint8_t Buf[50];
 	uint8_t Tx_R0[3]={0x00,0x40,0x70};
-
+	uint8_t ch;
 
 	//uint8_t Rx_Adr;
 	//uint8_t Rx_data[2];
@@ -215,7 +222,21 @@ void test41(void){
 	 while(i<256){
 
 	 Tx_R41[2]=i;
-	 while(!HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13));
+
+	 ///////////////////////////////////////////////////////////////////////////////////////
+	 strcpy((char*)Buf,"\n\rEnter number 1 to chage the phase shift: ");
+	 HAL_UART_Transmit(&huart1, Buf, strlen((char*)Buf),100);
+
+	 HAL_UART_Receive(&huart1, &ch, 1, HAL_MAX_DELAY);
+
+	 while(ch!=49);
+	 //strcpy((char*)Buf,"\n\rI am executing ");
+	 //HAL_UART_Transmit(&huart1, Buf, strlen((char*)Buf),100);
+	 ch=0;
+	////////////////////////////////////////////////////////////////////////////////////////
+
+
+	 //while(!HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13));
 	 HAL_Delay(200);
 
 	 HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET); //CS pin low
@@ -234,7 +255,7 @@ void test41(void){
 	 sprintf((char*)Buf,"\nReceive data is : 0x%X 0x%X",Rx_41_data[0],Rx_41_data[1]);
 	 HAL_UART_Transmit(&huart1, Buf, strlen((char*)Buf), 100);
 
-	 i++;
+	 i=i+5;
 	 }
 
 	 while(k<106){
@@ -259,7 +280,7 @@ void test41(void){
 	 	 sprintf((char*)Buf,"\nReceive data is : 0x%X 0x%X",Rx_41_data[0],Rx_41_data[1]);
 	 	 HAL_UART_Transmit(&huart1, Buf, strlen((char*)Buf), 100);
 
-	 	 k++;
+	 	 k=k+5;
 	 	 }
 
 
@@ -543,7 +564,7 @@ static void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
+  huart1.Init.BaudRate = 9600;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
