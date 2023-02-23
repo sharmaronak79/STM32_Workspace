@@ -3,7 +3,7 @@
   ******************************************************************************
   * @file           : main.c
   * @brief          : Main program body
-  * @Author			: Ronak Sharma
+  * @Author	    : Ronak Sharma
   ******************************************************************************
   * @attention
   * Make sure to See the Baudrate of Slave device, Set the Baudrate accordingly
