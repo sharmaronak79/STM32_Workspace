@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include<string.h>
+#include<stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -53,7 +54,10 @@ uint8_t rx_index=0;;
 uint8_t rx_data[6];
 uint8_t rx_buffer[100];
 uint8_t transfer_cplt;
-char tx_data[]="Application is Running\r\n";
+char tx_data[200]="Application is Running\r\n";
+char *cmd;
+char arg1[10];
+char arg2[10];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -65,7 +69,9 @@ static void MX_USART3_UART_Init(void);
 void MX_USB_HOST_Process(void);
 
 /* USER CODE BEGIN PFP */
-
+void process_data(char *);
+void Display(void);
+void print(char *);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -108,6 +114,7 @@ int main(void)
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
   HAL_UART_Transmit(&huart3, (uint8_t*)tx_data, strlen(tx_data), HAL_MAX_DELAY);
+  print("Testing....\r\n");
 
   while(! HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13));
   HAL_Delay(200);
@@ -395,17 +402,41 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	}else{
 		rx_index =0;
 		transfer_cplt=1;
-		HAL_UART_Transmit(&huart3, rx_buffer, strlen((char*)rx_buffer), HAL_MAX_DELAY);
-
-		strcpy(tx_data,"\n\rType your Msg: ");
+		sprintf(tx_data,"\r\nReceived msg : %s",(char*)rx_buffer);
 		HAL_UART_Transmit(&huart3, (uint8_t*)tx_data, strlen(tx_data), HAL_MAX_DELAY);
+		//HAL_UART_Transmit(&huart3, rx_buffer, strlen((char*)rx_buffer), HAL_MAX_DELAY);
 
+		process_data((char*)rx_buffer);
+		memset(rx_buffer,'\0',strlen((char*)rx_buffer));
 
-
+		Display();
 	}
-	//HAL_UART_Transmit(&huart3, rx_data, strlen((char*)rx_data), HAL_MAX_DELAY);
+
+}
+
+void process_data(char msg[50]){
+
+	strcpy(tx_data,"\n\rCommand is : \r\n");
+	HAL_UART_Transmit(&huart3, (uint8_t*)tx_data, strlen(tx_data), HAL_MAX_DELAY);
+
+	cmd=strtok(msg," ");
+	HAL_UART_Transmit(&huart3, (uint8_t*)cmd, strlen(cmd), 1000);
+}
+
+void Display(){
+	uint8_t cmd_display[500]="\n\rApplication Commands :\n\r"
+			"add - add <val1> <val2> for additions\n\r"
+			"sub - sub <val1> <val2> for subtraction\n\r"
+			"mul - mul <val1> <val2> for multiplication\n\r"
+			"div - div <val1> <val2> for division\n\r"
+			"App> ";
+	HAL_UART_Transmit(&huart3, cmd_display, strlen((char*)cmd_display), 1000);
 
 
+}
+
+void print(char msg[50]){
+	HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
 }
 /* USER CODE END 4 */
 
