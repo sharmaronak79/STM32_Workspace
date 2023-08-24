@@ -24,6 +24,7 @@
 /* USER CODE BEGIN Includes */
 #include<string.h>
 #include<stdio.h>
+#include "console.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -71,7 +72,7 @@ void MX_USB_HOST_Process(void);
 /* USER CODE BEGIN PFP */
 void process_data(char *);
 void Display(void);
-void print(char *);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -418,6 +419,7 @@ void process_data(char msg[50]){
 
 	char *token;
 
+
 	token = strtok(msg," ");
 	strcpy(cmd,token);
 
@@ -434,12 +436,22 @@ void process_data(char msg[50]){
 	sprintf(tx_data,"\n\rArg2 : %s",arg2);
 	HAL_UART_Transmit(&huart3, (uint8_t*)tx_data, strlen(tx_data), HAL_MAX_DELAY);
 
+	if(strcmp("add",cmd) == 0){
+		add_op(arg1,arg2);
+	}else if(strcmp("sub",cmd) == 0){
+		sub_op(arg1,arg2);
+	}else if(strcmp("mul",cmd) == 0){
+		mul_op(arg1,arg2);
+	}else if(strcmp("div",cmd) == 0){
+		div_op(arg1,arg2);
+	}else{
 
-
+		print("\r\nError in Command .....");
+	}
 }
 
 void Display(){
-	uint8_t cmd_display[500]="\n\rApplication Commands :\n\r"
+	uint8_t cmd_display[500]="\n\r\n\rApplication Commands :\n\r"
 			"add - add <val1> <val2> for additions\n\r"
 			"sub - sub <val1> <val2> for subtraction\n\r"
 			"mul - mul <val1> <val2> for multiplication\n\r"
@@ -450,9 +462,7 @@ void Display(){
 
 }
 
-void print(char msg[50]){
-	HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
-}
+
 /* USER CODE END 4 */
 
 /**
