@@ -55,7 +55,7 @@ uint8_t rx_data[6];
 uint8_t rx_buffer[100];
 uint8_t transfer_cplt;
 char tx_data[200]="Application is Running\r\n";
-char *cmd;
+char cmd[10];
 char arg1[10];
 char arg2[10];
 /* USER CODE END PV */
@@ -416,11 +416,26 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
 void process_data(char msg[50]){
 
-	strcpy(tx_data,"\n\rCommand is : \r\n");
+	char *token;
+
+	token = strtok(msg," ");
+	strcpy(cmd,token);
+
+	token = strtok(NULL," ");
+	strcpy(arg1,token);
+
+	token = strtok(NULL," ");
+	strcpy(arg2,token);
+
+	sprintf(tx_data,"\n\rCommand is : %s",cmd);
+	HAL_UART_Transmit(&huart3, (uint8_t*)tx_data, strlen(tx_data), HAL_MAX_DELAY);
+	sprintf(tx_data,"\n\rArg1 : %s",arg1);
+	HAL_UART_Transmit(&huart3, (uint8_t*)tx_data, strlen(tx_data), HAL_MAX_DELAY);
+	sprintf(tx_data,"\n\rArg2 : %s",arg2);
 	HAL_UART_Transmit(&huart3, (uint8_t*)tx_data, strlen(tx_data), HAL_MAX_DELAY);
 
-	cmd=strtok(msg," ");
-	HAL_UART_Transmit(&huart3, (uint8_t*)cmd, strlen(cmd), 1000);
+
+
 }
 
 void Display(){
