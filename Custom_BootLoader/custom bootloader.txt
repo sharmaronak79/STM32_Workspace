@@ -1,0 +1,1 @@
+Custom bootloader is used to store an applucation code in particular FLash area 
