@@ -3,7 +3,6 @@
   ******************************************************************************
   * @file           : main.c
   * @brief          : Main program body
-  * @author	    : Ronak Sharma
   ******************************************************************************
   * @attention
   *
@@ -49,6 +48,8 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+CRC_HandleTypeDef hcrc;
+
 UART_HandleTypeDef hlpuart1;
 UART_HandleTypeDef huart3;
 
@@ -61,6 +62,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_LPUART1_UART_Init(void);
 static void MX_USART3_UART_Init(void);
+static void MX_CRC_Init(void);
 /* USER CODE BEGIN PFP */
 static void printmsg(char *format,...);
 void bootloader_uart_read_data(void);
@@ -105,6 +107,7 @@ int main(void)
   MX_GPIO_Init();
   MX_LPUART1_UART_Init();
   MX_USART3_UART_Init();
+  MX_CRC_Init();
   /* USER CODE BEGIN 2 */
 /* Lets check wether a user button is pressed or not , if not pressed jump to user Application*/
 if(HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_13) == GPIO_PIN_SET){
@@ -182,6 +185,37 @@ void SystemClock_Config(void)
 }
 
 /**
+  * @brief CRC Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_CRC_Init(void)
+{
+
+  /* USER CODE BEGIN CRC_Init 0 */
+
+  /* USER CODE END CRC_Init 0 */
+
+  /* USER CODE BEGIN CRC_Init 1 */
+
+  /* USER CODE END CRC_Init 1 */
+  hcrc.Instance = CRC;
+  hcrc.Init.DefaultPolynomialUse = DEFAULT_POLYNOMIAL_ENABLE;
+  hcrc.Init.DefaultInitValueUse = DEFAULT_INIT_VALUE_ENABLE;
+  hcrc.Init.InputDataInversionMode = CRC_INPUTDATA_INVERSION_NONE;
+  hcrc.Init.OutputDataInversionMode = CRC_OUTPUTDATA_INVERSION_DISABLE;
+  hcrc.InputDataFormat = CRC_INPUTDATA_FORMAT_BYTES;
+  if (HAL_CRC_Init(&hcrc) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN CRC_Init 2 */
+
+  /* USER CODE END CRC_Init 2 */
+
+}
+
+/**
   * @brief LPUART1 Initialization Function
   * @param None
   * @retval None
@@ -197,8 +231,8 @@ static void MX_LPUART1_UART_Init(void)
 
   /* USER CODE END LPUART1_Init 1 */
   hlpuart1.Instance = LPUART1;
-  hlpuart1.Init.BaudRate = 115200;
-  hlpuart1.Init.WordLength = UART_WORDLENGTH_8B;
+  hlpuart1.Init.BaudRate = 209700;
+  hlpuart1.Init.WordLength = UART_WORDLENGTH_7B;
   hlpuart1.Init.StopBits = UART_STOPBITS_1;
   hlpuart1.Init.Parity = UART_PARITY_NONE;
   hlpuart1.Init.Mode = UART_MODE_TX_RX;
@@ -422,9 +456,38 @@ void printmsg(char *format,...){
 
 /*************Bootloader Handle Functions*************/
 
-void bootloader_handle_getver_cmd(uint8_t *bl_rx_buffer){
+void bootloader_handle_getver_cmd(uint8_t *bl_rx_buffer)
+{
+    uint8_t bl_version;
+
+    // 1) verify the checksum
+      printmsg("BL_DEBUG_MSG:bootloader_handle_getver_cmd\n");
+
+	 //Total length of the command packet
+	  uint32_t command_packet_len = bl_rx_buffer[0]+1 ;
+
+	  //extract the CRC32 sent by the Host
+	  uint32_t host_crc = *((uint32_t * ) (bl_rx_buffer+command_packet_len - 4) ) ;
+
+    if (! bootloader_verify_crc(&bl_rx_buffer[0],command_packet_len-4,host_crc))
+    {
+        printmsg("BL_DEBUG_MSG:checksum success !!\n");
+        // checksum is correct..
+        bootloader_send_ack(bl_rx_buffer[0],1);
+        bl_version=get_bootloader_version();
+        printmsg("BL_DEBUG_MSG:BL_VER : %d %#x\n",bl_version,bl_version);
+        bootloader_uart_write_data(&bl_version,1);
+
+    }else
+    {
+        printmsg("BL_DEBUG_MSG:checksum fail !!\n");
+        //checksum is wrong send nack
+        bootloader_send_nack();
+    }
+
 
 }
+
 void bootloader_handle_gethelp_cmd(uint8_t *bl_rx_buffer){
 
 }
@@ -460,8 +523,58 @@ void bootloader_handle_dis_rw_protect(uint8_t *bl_rx_buffer){
 }
 
 
+/*This fucntion sends ACK if CRC  atches slong with"len to follw"*/
+void bootloader_send_ack(uint8_t command_code,uint8_t follow_len)
+{
+//Here we send two bytes first byte is ack and the second byte is len value
+	uint8_t ack_buf[2];
+	ack_buf[0] = BL_ACK;
+	ack_buf[1] = follow_len;
+	HAL_UART_Transmit(C_UART,ack_buf,2,HAL_MAX_DELAY);
+}
+
+void bootloader_send_nack(void)
+{
+	uint8_t nack = BL_NACK;
+	HAL_UART_Transmit(C_UART,&nack,1,HAL_MAX_DELAY);
+}
+
+//This verifies the CRC of the given buffer in pData .
+uint8_t bootloader_verify_crc (uint8_t *pData, uint32_t len, uint32_t crc_host)
+{
+    uint32_t uwCRCValue=0xff;
+
+    for (uint32_t i=0 ; i < len ; i++)
+	{
+        uint32_t i_data = pData[i];
+        uwCRCValue = HAL_CRC_Accumulate(&hcrc, &i_data, 1);
+	}
+
+	 /* Reset CRC Calculation Unit */
+  __HAL_CRC_DR_RESET(&hcrc);
+
+	if( uwCRCValue == crc_host)
+	{
+		return VERIFY_CRC_SUCCESS;
+	}
+
+	return VERIFY_CRC_FAIL;
+}
+
+/* This function writes data in to C_UART */
+void bootloader_uart_write_data(uint8_t *pBuffer,uint32_t len)
+{
+    /*you can replace the below ST's USART driver API call with your MCUs driver API call */
+	HAL_UART_Transmit(C_UART,pBuffer,len,HAL_MAX_DELAY);
+
+}
 
 
+//Just returns the macro value .
+uint8_t get_bootloader_version(void)
+{
+  return (uint8_t)BL_VERSION;
+}
 /* USER CODE END 4 */
 
 /**
